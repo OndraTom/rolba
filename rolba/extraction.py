@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from urllib.parse import urlsplit
 from scrapy import Spider
 from scrapy.crawler import CrawlerProcess
 from scrapy.http.response import Response
@@ -43,7 +44,11 @@ class VinylEmpireRecordsSpider(Spider):
             })
         next_page = response.css('li.pagination_next a::attr(href)').get()
         if next_page:
-            yield response.follow(response.request.url + next_page, self.parse)
+            request_url_split = urlsplit(response.request.url)
+            yield response.follow(
+                f"{request_url_split.scheme}://{request_url_split.netloc}{next_page}",
+                self.parse
+            )
 
     @staticmethod
     def _get_price_from_string(price_value: str) -> float:
@@ -52,7 +57,7 @@ class VinylEmpireRecordsSpider(Spider):
 
 class VinylEmpireRecordsExtractor(WebSpiderRecordsExtractor):
 
-    RECORDS_URL = "https://vinylempire.cz/13-bazarove-vinyly"
+    RECORDS_URL = "https://vinylempire.cz/13-bazarove-vinyly?id_category=13&n=60"
 
     def _register_spider(self):
         self.crawler_process.crawl(
