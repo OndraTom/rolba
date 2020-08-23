@@ -1,0 +1,24 @@
+version: '3'
+services:
+    app:
+      build:
+        context: .
+      container_name: app
+      volumes:
+      - ./run.py:/app/run.py
+      - ./config.json:/app/config.json
+      - ./storage:/app/storage
+    unit_tests:
+      build:
+        context: .
+      container_name: unit_tests
+      volumes:
+      - ./tests/unit:/app/tests
+      command: ["python3", "-m", "unittest", "discover", "-s", "./tests"]
+    integration_tests:
+      build:
+        context: .
+      container_name: integration_tests
+      volumes:
+      - ./tests/integration:/app/tests
+      command: ["python3", "-m", "unittest", "discover", "-s", "./tests"]

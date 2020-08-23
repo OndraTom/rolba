@@ -1,0 +1,5 @@
+.idea/
+venv/
+storage/*
+!storage/.gitkeep
+config.json

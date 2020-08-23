@@ -1,0 +1,7 @@
+{
+  "emailing": {
+    "smtp_url": "test smtp_url",
+    "user": "test user",
+    "password": "test password"
+  }
+}
