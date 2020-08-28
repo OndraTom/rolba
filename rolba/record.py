@@ -24,7 +24,7 @@ class VinylRecord(Record):
         return self.name == other.name and self.price == other.price
 
     def __str__(self) -> str:
-        return f"{self.name}|{self.price}"
+        return f"{self.name} | {round(self.price)} Kč"
 
     def get_name(self) -> str:
         return self.name
