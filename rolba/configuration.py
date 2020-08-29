@@ -17,10 +17,15 @@ class Configuration:
                 "required": [
                     "smtp_url", "user", "password"
                 ]
+            },
+            "subscribers": {
+                "type": "array",
+                "item": {"type": "string"}
             }
         },
         "required": [
-            "emailing"
+            "emailing",
+            "subscribers"
         ]
     }
 
@@ -44,6 +49,9 @@ class Configuration:
 
     def get_emailing_password(self) -> str:
         return self.config["emailing"]["password"]
+
+    def get_subscribers(self) -> [str]:
+        return self.config["subscribers"]
 
 
 class ConfigurationException(Exception):

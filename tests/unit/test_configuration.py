@@ -15,6 +15,7 @@ class ConfigurationTest(TestCase):
         self.assertEqual(config.get_smtp_url(), "test smtp_url")
         self.assertEqual(config.get_emailing_user(), "test user")
         self.assertEqual(config.get_emailing_password(), "test password")
+        self.assertEqual(config.get_subscribers(), ["test@test.test"])
 
     def test_config_file_not_found_error(self):
         with self.assertRaises(ConfigurationFileNotFound):

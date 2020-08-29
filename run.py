@@ -25,7 +25,7 @@ try:
                 user=configuration.get_emailing_user(),
                 password=configuration.get_emailing_password()
             ),
-            subscribers_emails=["o.tom@seznam.cz"],
+            subscribers_emails=configuration.get_subscribers(),
             email_subject="Vinyl records notification"
         )
     ).register_extraction(
