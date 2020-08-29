@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from urllib.parse import urlsplit
+from urllib.parse import urlsplit, urlparse
 from scrapy import Spider
 from scrapy.crawler import CrawlerProcess
 from scrapy.http.response import Response
@@ -40,7 +40,8 @@ class VinylEmpireRecordsSpider(Spider):
                 'name': product_container.css('a.product-name ::text').get().strip(),
                 'price': self._get_price_from_string(
                     product_container.css('span.product-price ::text').get().strip()
-                )
+                ),
+                'link': product_container.css('a.product-name ::attr(href)').get().strip()
             })
         next_page = response.css('li.pagination_next a::attr(href)').get()
         if next_page:
@@ -65,7 +66,7 @@ class VinylEmpireRecordsExtractor(WebSpiderRecordsExtractor):
             args={
                 "start_urls": [self.RECORDS_URL],
                 "data_read_callback": lambda record: self.records.add_record(
-                    VinylRecord(record["name"], record["price"])
+                    VinylRecord(record["name"], record["price"], record["link"])
                 )
             }
         )
@@ -90,6 +91,10 @@ class BlackVinylBazarRecordsSpider(Spider):
                 'name': product_container.css('a.nadpisramecek ::text').get().strip(),
                 'price': self._get_price_from_string(
                     product_container.css('a.objednejkosobr ::text').get().strip()
+                ),
+                'link': self._get_product_link(
+                    response,
+                    product_container.css('a.nadpisramecek ::attr(href)').get().strip()
                 )
             })
         if not is_empty_page:
@@ -105,6 +110,11 @@ class BlackVinylBazarRecordsSpider(Spider):
         current_url_split[-1] = str(int(current_url_split[-1]) + 1)
         return "-".join(current_url_split)
 
+    @staticmethod
+    def _get_product_link(response: Response, product_link: str) -> str:
+        parsed_uri = urlparse(response.request.url)
+        return f"{parsed_uri.scheme}://{parsed_uri.netloc}/{product_link}"
+
 
 class BlackVinylBazarRecordsExtractor(WebSpiderRecordsExtractor):
 
@@ -116,7 +126,7 @@ class BlackVinylBazarRecordsExtractor(WebSpiderRecordsExtractor):
             args={
                 "start_urls": [self.RECORDS_URL],
                 "data_read_callback": lambda record: self.records.add_record(
-                    VinylRecord(record["name"], record["price"])
+                    VinylRecord(record["name"], record["price"], record["link"])
                 )
             }
         )

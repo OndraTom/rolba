@@ -1,6 +1,6 @@
 from typing import Tuple, List
 from abc import ABC, abstractmethod
-from rolba.record import RecordsCollection
+from rolba.record import RecordsCollection, VinylRecord
 from rolba.email import EmailMessage, EmailSender
 
 
@@ -11,7 +11,7 @@ class RecordsCollectionsNotifier(ABC):
         pass
 
 
-class EmailRecordsCollectionsNotifier(RecordsCollectionsNotifier):
+class EmailVinylRecordsCollectionsNotifier(RecordsCollectionsNotifier):
 
     def __init__(self, email_sender: EmailSender, subscribers_emails: [str], email_subject: str):
         super().__init__()
@@ -33,14 +33,19 @@ class EmailRecordsCollectionsNotifier(RecordsCollectionsNotifier):
         message = """
         <html>
             <body>
-                <h1>Records Notification</h1>
+                <h1>Vinyl Records Notification</h1>
         """
         for collection_name, collection in records_collections:
             message += f"<h2>{collection_name}</h2>"
             if len(collection):
                 message += "<ul>"
-                for record in collection.get_records():
-                    message += f"<li>{record}</li>"
+                vinyl_records: [VinylRecord] = collection.get_records()
+                for record in vinyl_records:
+                    message += f"""
+                        <li>
+                            <a href='{record.get_link()}'>{record.get_name()}</a> | {round(record.get_price())} Kč
+                        </li>
+                    """
                 message += "</ul>"
             else:
                 message += "<p>No new records</p>"

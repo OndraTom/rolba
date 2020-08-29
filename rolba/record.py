@@ -16,12 +16,13 @@ class Record(ABC):
 
 class VinylRecord(Record):
 
-    def __init__(self, name: str, price: float):
+    def __init__(self, name: str, price: float, link: str):
         self.name = name
         self.price = price
+        self.link = link
 
     def __eq__(self, other: "VinylRecord") -> bool:
-        return self.name == other.name and self.price == other.price
+        return self.name == other.name and self.price == other.price and self.link == other.link
 
     def __str__(self) -> str:
         return f"{self.name} | {round(self.price)} Kč"
@@ -31,6 +32,9 @@ class VinylRecord(Record):
 
     def get_price(self) -> float:
         return self.price
+
+    def get_link(self) -> str:
+        return self.link
 
 
 class RecordFactory(ABC):
@@ -52,9 +56,13 @@ class VinylRecordFactory(RecordFactory):
             "price": {
                 "type": "number",
                 "minimum": 0
+            },
+            "link": {
+                "type": "string",
+                "minLength": 1
             }
         },
-        "required": ["name", "price"]
+        "required": ["name", "price", "link"]
     }
 
     def create_from_dict(self, dict_record: dict) -> Record:
@@ -62,7 +70,8 @@ class VinylRecordFactory(RecordFactory):
             jsonschema.validate(dict_record, self.SCHEMA)
             return VinylRecord(
                 name=dict_record["name"],
-                price=dict_record["price"]
+                price=dict_record["price"],
+                link=dict_record["link"]
             )
         except jsonschema.ValidationError:
             raise InvalidJsonSchemaError(dict_record)
@@ -80,7 +89,8 @@ class VinylRecordDictMapper(RecordDictMapper):
     def get_mapped_record(self, record: VinylRecord) -> dict:
         return {
             "name": record.get_name(),
-            "price": record.get_price()
+            "price": record.get_price(),
+            "link": record.get_link()
         }
 
 

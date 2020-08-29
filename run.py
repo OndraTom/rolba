@@ -5,7 +5,7 @@ from rolba.configuration import Configuration, ConfigurationException
 from rolba.record import VinylRecordFactory, VinylRecordDictMapper
 from rolba.extraction import VinylEmpireRecordsExtractor, BlackVinylBazarRecordsExtractor
 from rolba.repository import JsonFileRecordsRepository
-from rolba.notification import EmailRecordsCollectionsNotifier
+from rolba.notification import EmailVinylRecordsCollectionsNotifier
 from rolba.email import SimpleSmtpEmailSender
 from rolba.worker import WebSpiderExtractionsProcessor
 
@@ -19,7 +19,7 @@ try:
 
     WebSpiderExtractionsProcessor(
         crawler_process=crawler_process,
-        records_collections_notifier=EmailRecordsCollectionsNotifier(
+        records_collections_notifier=EmailVinylRecordsCollectionsNotifier(
             email_sender=SimpleSmtpEmailSender(
                 smtp_url=configuration.get_smtp_url(),
                 user=configuration.get_emailing_user(),
