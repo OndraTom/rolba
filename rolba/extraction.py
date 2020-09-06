@@ -183,3 +183,55 @@ class VinylBazarRecordsExtractor(WebSpiderRecordsExtractor):
                 )
             }
         )
+
+
+class LpBazarRecordsSpider(Spider):
+
+    name = "LP Bazar records spider"
+
+    def __init__(self, **kwargs):
+        super().__init__()
+        self.start_urls = kwargs["args"]["start_urls"]
+        self.data_read_callback = kwargs["args"]["data_read_callback"]
+
+    def parse(self, response: Response, **kwargs):
+        for product_container in response.css('div.product'):
+            availability = product_container.css("span.p-cat-availability ::text").get().strip()
+            if not availability.startswith("Skladem"):
+                continue
+            self.data_read_callback({
+                'name': product_container.css('a.p-name span ::text').get().strip(),
+                'price': self._get_price_from_string(
+                    product_container.css('span.p-det-main-price ::text').get().strip()
+                ),
+                'link': response.request.url + product_container.css(
+                    'a.p-name ::attr(href)'
+                ).get().strip()[1:]
+            })
+        next_page = response.css('div.pagination a.s-page.pagination-page ::attr(href)').get()
+        if next_page:
+            request_url_split = urlsplit(response.request.url)
+            yield response.follow(
+                f"{request_url_split.scheme}://{request_url_split.netloc}{next_page}",
+                self.parse
+            )
+
+    @staticmethod
+    def _get_price_from_string(price_value: str) -> float:
+        return float(price_value.split(" ")[0].replace(",", "."))
+
+
+class LpBazarRecordsExtractor(WebSpiderRecordsExtractor):
+
+    RECORDS_URL = "https://www.lpbazar.cz/lp-desky/"
+
+    def _register_spider(self):
+        self.crawler_process.crawl(
+            LpBazarRecordsSpider,
+            args={
+                "start_urls": [self.RECORDS_URL],
+                "data_read_callback": lambda record: self.records.add_record(
+                    VinylRecord(record["name"], record["price"], record["link"])
+                )
+            }
+        )

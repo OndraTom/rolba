@@ -3,7 +3,8 @@ from scrapy.crawler import CrawlerProcess
 from rolba.log import StandardOutputLogger
 from rolba.configuration import Configuration, ConfigurationException
 from rolba.record import VinylRecordFactory, VinylRecordDictMapper
-from rolba.extraction import VinylEmpireRecordsExtractor, BlackVinylBazarRecordsExtractor, VinylBazarRecordsExtractor
+from rolba.extraction import VinylEmpireRecordsExtractor, BlackVinylBazarRecordsExtractor, VinylBazarRecordsExtractor, \
+    LpBazarRecordsExtractor
 from rolba.repository import JsonFileRecordsRepository
 from rolba.notification import EmailVinylRecordsCollectionsNotifier
 from rolba.email import SimpleSmtpEmailSender
@@ -58,6 +59,16 @@ try:
         ),
         repository=JsonFileRecordsRepository(
             file_path=storage_dir_path + "/vinyl_bazar_records.json",
+            record_factory=VinylRecordFactory(),
+            record_dict_mapper=VinylRecordDictMapper()
+        )
+    ).register_extraction(
+        title="LP Bazar",
+        extractor=LpBazarRecordsExtractor(
+            crawler_process=crawler_process
+        ),
+        repository=JsonFileRecordsRepository(
+            file_path=storage_dir_path + "/lp_bazar_records.json",
             record_factory=VinylRecordFactory(),
             record_dict_mapper=VinylRecordDictMapper()
         )

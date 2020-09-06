@@ -4,7 +4,8 @@ from unittest import TestCase, mock
 from scrapy.crawler import CrawlerProcess
 from rolba.record import VinylRecordFactory, VinylRecordDictMapper
 from rolba.repository import JsonFileRecordsRepository
-from rolba.extraction import VinylEmpireRecordsExtractor, BlackVinylBazarRecordsExtractor, VinylBazarRecordsExtractor
+from rolba.extraction import VinylEmpireRecordsExtractor, BlackVinylBazarRecordsExtractor, VinylBazarRecordsExtractor, \
+    LpBazarRecordsExtractor
 from rolba.worker import WebSpiderExtractionsProcessor
 
 
@@ -57,10 +58,26 @@ class WebSpiderExtractionsProcessorTest(TestCase):
                 record_factory=VinylRecordFactory(),
                 record_dict_mapper=VinylRecordDictMapper()
             )
+        ).register_extraction(
+            title="LP Bazar",
+            extractor=LpBazarRecordsExtractor(
+                crawler_process=crawler_process
+            ),
+            repository=JsonFileRecordsRepository(
+                file_path=self.TEST_STORAGE_DIR_PATH + "/lp_bazar_records.json",
+                record_factory=VinylRecordFactory(),
+                record_dict_mapper=VinylRecordDictMapper()
+            )
         ).run()
         self.assertTrue(
             os.path.isfile(self.TEST_STORAGE_DIR_PATH + "/vinyl_empire_records.json")
         )
         self.assertTrue(
             os.path.isfile(self.TEST_STORAGE_DIR_PATH + "/black_vinyl_bazar_records.json")
+        )
+        self.assertTrue(
+            os.path.isfile(self.TEST_STORAGE_DIR_PATH + "/vinyl_bazar_records.json")
+        )
+        self.assertTrue(
+            os.path.isfile(self.TEST_STORAGE_DIR_PATH + "/lp_bazar_records.json")
         )
