@@ -130,3 +130,56 @@ class BlackVinylBazarRecordsExtractor(WebSpiderRecordsExtractor):
                 )
             }
         )
+
+
+class VinylBazarRecordsSpider(Spider):
+
+    name = "Vinyl Bazar records spider"
+
+    def __init__(self, **kwargs):
+        super().__init__()
+        self.start_urls = kwargs["args"]["start_urls"]
+        self.data_read_callback = kwargs["args"]["data_read_callback"]
+
+    def parse(self, response: Response, **kwargs):
+        for product_container in response.css('div.product'):
+            self.data_read_callback({
+                'name': product_container.css('div.productTitleContent a ::text').get().strip(),
+                'price': self._get_price_from_string(
+                    product_container.css('span.product_price_text ::text').get().strip()
+                ),
+                'link': response.request.url + product_container.css(
+                    'div.productTitleContent a ::attr(href)'
+                ).get().strip()
+            })
+        next_page = response.css('div.pagination a.next ::attr(href)').get()
+        if next_page:
+            yield response.follow(next_page, self.parse)
+
+    @staticmethod
+    def _get_price_from_string(price_value: str) -> float:
+        return float(price_value.split("\xa0")[0].replace(",", "."))
+
+
+class VinylBazarRecordsExtractor(WebSpiderRecordsExtractor):
+
+    RECORDS_URLS = [
+        "https://www.vinylbazar.net/pop-rock-usa-uk",
+        "https://www.vinylbazar.net/soul-funk-disco",
+        "https://www.vinylbazar.net/breakbeat",
+        "https://www.vinylbazar.net/downtempo-chillout",
+        "https://www.vinylbazar.net/jazz-blues-usa-uk",
+        "https://www.vinylbazar.net/country-folk",
+        "https://www.vinylbazar.net/etnicka-hudba"
+    ]
+
+    def _register_spider(self):
+        self.crawler_process.crawl(
+            VinylBazarRecordsSpider,
+            args={
+                "start_urls": self.RECORDS_URLS,
+                "data_read_callback": lambda record: self.records.add_record(
+                    VinylRecord(record["name"], record["price"], record["link"])
+                )
+            }
+        )

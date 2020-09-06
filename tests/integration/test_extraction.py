@@ -4,7 +4,7 @@ from unittest import TestCase, mock
 from scrapy.crawler import CrawlerProcess
 from rolba.record import VinylRecordFactory, VinylRecordDictMapper
 from rolba.repository import JsonFileRecordsRepository
-from rolba.extraction import VinylEmpireRecordsExtractor, BlackVinylBazarRecordsExtractor
+from rolba.extraction import VinylEmpireRecordsExtractor, BlackVinylBazarRecordsExtractor, VinylBazarRecordsExtractor
 from rolba.worker import WebSpiderExtractionsProcessor
 
 
@@ -44,6 +44,16 @@ class WebSpiderExtractionsProcessorTest(TestCase):
             ),
             repository=JsonFileRecordsRepository(
                 file_path=self.TEST_STORAGE_DIR_PATH + "/black_vinyl_bazar_records.json",
+                record_factory=VinylRecordFactory(),
+                record_dict_mapper=VinylRecordDictMapper()
+            )
+        ).register_extraction(
+            title="Vinyl Bazar",
+            extractor=VinylBazarRecordsExtractor(
+                crawler_process=crawler_process
+            ),
+            repository=JsonFileRecordsRepository(
+                file_path=self.TEST_STORAGE_DIR_PATH + "/vinyl_bazar_records.json",
                 record_factory=VinylRecordFactory(),
                 record_dict_mapper=VinylRecordDictMapper()
             )

@@ -3,7 +3,7 @@ from scrapy.crawler import CrawlerProcess
 from rolba.log import StandardOutputLogger
 from rolba.configuration import Configuration, ConfigurationException
 from rolba.record import VinylRecordFactory, VinylRecordDictMapper
-from rolba.extraction import VinylEmpireRecordsExtractor, BlackVinylBazarRecordsExtractor
+from rolba.extraction import VinylEmpireRecordsExtractor, BlackVinylBazarRecordsExtractor, VinylBazarRecordsExtractor
 from rolba.repository import JsonFileRecordsRepository
 from rolba.notification import EmailVinylRecordsCollectionsNotifier
 from rolba.email import SimpleSmtpEmailSender
@@ -12,9 +12,12 @@ from rolba.worker import WebSpiderExtractionsProcessor
 
 logger = StandardOutputLogger()
 
+current_dir_path = os.path.dirname(os.path.abspath(__file__))
+storage_dir_path = current_dir_path + "/storage"
+
 
 try:
-    configuration = Configuration(os.path.dirname(os.path.abspath(__file__)) + "/config.json")
+    configuration = Configuration(current_dir_path + "/config.json")
     crawler_process = CrawlerProcess()
 
     WebSpiderExtractionsProcessor(
@@ -34,7 +37,7 @@ try:
             crawler_process=crawler_process
         ),
         repository=JsonFileRecordsRepository(
-            file_path=os.path.dirname(os.path.abspath(__file__)) + "/storage/vinyl_empire_records.json",
+            file_path=storage_dir_path + "/vinyl_empire_records.json",
             record_factory=VinylRecordFactory(),
             record_dict_mapper=VinylRecordDictMapper()
         )
@@ -44,7 +47,17 @@ try:
             crawler_process=crawler_process
         ),
         repository=JsonFileRecordsRepository(
-            file_path=os.path.dirname(os.path.abspath(__file__)) + "/storage/black_vinyl_bazar_records.json",
+            file_path=storage_dir_path + "/black_vinyl_bazar_records.json",
+            record_factory=VinylRecordFactory(),
+            record_dict_mapper=VinylRecordDictMapper()
+        )
+    ).register_extraction(
+        title="Vinyl Bazar",
+        extractor=VinylBazarRecordsExtractor(
+            crawler_process=crawler_process
+        ),
+        repository=JsonFileRecordsRepository(
+            file_path=storage_dir_path + "/vinyl_bazar_records.json",
             record_factory=VinylRecordFactory(),
             record_dict_mapper=VinylRecordDictMapper()
         )
