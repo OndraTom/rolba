@@ -10,6 +10,13 @@ class RecordsExtractor(ABC):
     pass
 
 
+class WebSpider(Spider, ABC):
+
+    custom_settings = {
+        "USER_AGENT": "Mozilla/5.0 (iPad; CPU OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+    }
+
+
 class WebSpiderRecordsExtractor(RecordsExtractor, ABC):
 
     def __init__(self, crawler_process: CrawlerProcess):
@@ -25,7 +32,7 @@ class WebSpiderRecordsExtractor(RecordsExtractor, ABC):
         return self.records
 
 
-class VinylEmpireRecordsSpider(Spider):
+class VinylEmpireRecordsSpider(WebSpider):
 
     name = "Vinyl empire records spider"
 
@@ -72,7 +79,7 @@ class VinylEmpireRecordsExtractor(WebSpiderRecordsExtractor):
         )
 
 
-class BlackVinylBazarRecordsSpider(Spider):
+class BlackVinylBazarRecordsSpider(WebSpider):
 
     name = "Black Vinyl Bazar records spider"
 
@@ -132,7 +139,7 @@ class BlackVinylBazarRecordsExtractor(WebSpiderRecordsExtractor):
         )
 
 
-class VinylBazarRecordsSpider(Spider):
+class VinylBazarRecordsSpider(WebSpider):
 
     name = "Vinyl Bazar records spider"
 
@@ -148,7 +155,7 @@ class VinylBazarRecordsSpider(Spider):
                 'price': self._get_price_from_string(
                     product_container.css('span.product_price_text ::text').get().strip()
                 ),
-                'link': response.request.url + product_container.css(
+                'link': self._get_base_url(response.request.url) + product_container.css(
                     'div.productTitleContent a ::attr(href)'
                 ).get().strip()
             })
@@ -159,6 +166,11 @@ class VinylBazarRecordsSpider(Spider):
     @staticmethod
     def _get_price_from_string(price_value: str) -> float:
         return float(price_value.split("\xa0")[0].replace(",", "."))
+
+    @staticmethod
+    def _get_base_url(url: str):
+        parsed_uri = urlparse(url)
+        return f"{parsed_uri.scheme}://{parsed_uri.netloc}"
 
 
 class VinylBazarRecordsExtractor(WebSpiderRecordsExtractor):
@@ -185,7 +197,7 @@ class VinylBazarRecordsExtractor(WebSpiderRecordsExtractor):
         )
 
 
-class LpBazarRecordsSpider(Spider):
+class LpBazarRecordsSpider(WebSpider):
 
     name = "LP Bazar records spider"
 
@@ -204,7 +216,7 @@ class LpBazarRecordsSpider(Spider):
                 'price': self._get_price_from_string(
                     product_container.css('span.p-det-main-price ::text').get().strip()
                 ),
-                'link': response.request.url + product_container.css(
+                'link': self._get_base_url(response.request.url) + product_container.css(
                     'a.p-name ::attr(href)'
                 ).get().strip()[1:]
             })
@@ -219,6 +231,11 @@ class LpBazarRecordsSpider(Spider):
     @staticmethod
     def _get_price_from_string(price_value: str) -> float:
         return float(price_value.split(" ")[0].replace(",", "."))
+
+    @staticmethod
+    def _get_base_url(url: str):
+        parsed_uri = urlparse(url)
+        return f"{parsed_uri.scheme}://{parsed_uri.netloc}/"
 
 
 class LpBazarRecordsExtractor(WebSpiderRecordsExtractor):
