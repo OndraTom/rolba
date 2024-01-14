@@ -34,7 +34,8 @@ class SimpleSmtpEmailSender(EmailSender):
 
     def send_email(self, email: EmailMessage, recipients: [str]):
         context = ssl.create_default_context()
-        with smtplib.SMTP_SSL(self.smtp_url, 465, context=context) as server:
+        with smtplib.SMTP(self.smtp_url, 587) as server:
+            server.starttls(context=context)
             server.login(self.user, self.password)
             message = MIMEMultipart()
             message["Subject"] = email.get_subject()
